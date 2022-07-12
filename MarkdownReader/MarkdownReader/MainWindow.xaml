@@ -5,8 +5,27 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MarkdownReader"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        Title="Markdown Reader" Height="800" Width="1000">
+    
+    <Grid DragDrop.Drop="Grid_Drop">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+        </Grid.RowDefinitions>
+        <DockPanel Grid.Row="0" Grid.Column="0">
+            <Menu DockPanel.Dock="Top">
+                <MenuItem Header="_File">
+                    <MenuItem Header="_Open" Click="MenuItem_Click" />
+                    <Separator />
+                    <MenuItem Header="_Exit" Click="MenuItem_Click_Exit" />
+                </MenuItem>
+            </Menu>
+            <TextBox Name="pathToFile" AcceptsReturn="True" />
+        </DockPanel>
 
+        <WebBrowser  DragDrop.Drop="Grid_Drop" Grid.Column="0" Grid.Row="1" Navigating="browser_Navigating" Name="browser"></WebBrowser>
     </Grid>
 </Window>

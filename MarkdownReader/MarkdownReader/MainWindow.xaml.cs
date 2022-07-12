@@ -1,4 +1,5 @@
-﻿using Microsoft.Win32;
+﻿using Markdig;
+using Microsoft.Win32;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -20,7 +21,16 @@ namespace MarkdownReader
         {
             try
             {
-                string html = Markdig.Markdown.ToHtml(markdown);
+                var pipeline = new MarkdownPipelineBuilder()
+                    .UseAdvancedExtensions()
+                    .UsePipeTables()
+                    .UseMediaLinks()
+                    .Build();
+
+                string html = "<!DOCTYPE html><style>body{font-family:Helvetica,Arial}</style>";
+                html += Markdig.Markdown.ToHtml(markdown, pipeline);
+                
+
                 browser.NavigateToString(html);
             }
             catch (System.Exception ex)

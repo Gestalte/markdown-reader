@@ -3,18 +3,24 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.3.32611.2
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarkdownReader", "MarkdownReader\MarkdownReader.csproj", "{C29887F7-F3CB-46F5-94F9-B1A40E5F8FCE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarkdownReader", "MarkdownReader\MarkdownReader.csproj", "{C29887F7-F3CB-46F5-94F9-B1A40E5F8FCE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
 		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{C29887F7-F3CB-46F5-94F9-B1A40E5F8FCE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C29887F7-F3CB-46F5-94F9-B1A40E5F8FCE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C29887F7-F3CB-46F5-94F9-B1A40E5F8FCE}.Debug|x64.ActiveCfg = Debug|x64
+		{C29887F7-F3CB-46F5-94F9-B1A40E5F8FCE}.Debug|x64.Build.0 = Debug|x64
 		{C29887F7-F3CB-46F5-94F9-B1A40E5F8FCE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C29887F7-F3CB-46F5-94F9-B1A40E5F8FCE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C29887F7-F3CB-46F5-94F9-B1A40E5F8FCE}.Release|x64.ActiveCfg = Release|x64
+		{C29887F7-F3CB-46F5-94F9-B1A40E5F8FCE}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

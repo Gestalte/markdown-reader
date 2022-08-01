@@ -17,7 +17,7 @@ namespace MarkdownReader
             InitializeComponent();
         }
 
-        private void loadMarkdown(string markdown)
+        private void loadMarkdown(string markdown, string path)
         {
             try
             {
@@ -27,9 +27,10 @@ namespace MarkdownReader
                     .UseMediaLinks()
                     .Build();
 
-                string html = "<!DOCTYPE html><style>body{font-family:Helvetica,Arial}</style>";
+                var htmlBase = $"<base href=\"{path}\">";
+
+                string html = htmlBase + "<!DOCTYPE html><style>body{font-family:Helvetica,Arial}</style>";
                 html += Markdig.Markdown.ToHtml(markdown, pipeline);
-                
 
                 browser.NavigateToString(html);
             }
@@ -80,7 +81,7 @@ namespace MarkdownReader
                 return;
             }
 
-            if (path.Substring(0,8)=="file:///") // Open drag and drop file.
+            if (path.Substring(0, 8) == "file:///") // Open drag and drop file.
             {
                 path = path.Substring(8);
             }
@@ -91,7 +92,7 @@ namespace MarkdownReader
 
             string markdown = File.ReadAllText(filepath);
 
-            loadMarkdown(markdown);
+            loadMarkdown(markdown, path);
         }
 
         private void MenuItem_Click(object sender, RoutedEventArgs e)

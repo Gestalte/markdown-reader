@@ -6,16 +6,17 @@
         xmlns:local="clr-namespace:MarkdownReader"
         mc:Ignorable="d"
         Title="Markdown Reader" Height="800" Width="1000">
-    
+
     <Grid DragDrop.Drop="Grid_Drop">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="4*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="auto"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <DockPanel Grid.Row="0" Grid.Column="0">
+        <DockPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
             <Menu DockPanel.Dock="Top">
                 <MenuItem Header="_File">
                     <MenuItem Header="_Open" Click="MenuItem_Click" />
@@ -26,6 +27,9 @@
             <TextBox Name="pathToFile" AcceptsReturn="True" />
         </DockPanel>
 
-        <WebBrowser  DragDrop.Drop="Grid_Drop" Grid.Column="0" Grid.Row="1" Navigating="browser_Navigating" Name="browser"></WebBrowser>
+        <TreeView x:Name="tvChapters" Grid.Column="0" Grid.Row="1" SelectedItemChanged="tvChapters_SelectedItemChanged"/>
+
+        <WebBrowser DragDrop.Drop="Grid_Drop" Grid.Column="1" Grid.Row="1" Navigating="browser_Navigating" Name="browser"></WebBrowser>
+
     </Grid>
 </Window>

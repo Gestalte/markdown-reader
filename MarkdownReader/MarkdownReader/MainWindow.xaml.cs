@@ -3,7 +3,11 @@ using Microsoft.Win32;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace MarkdownReader
 {
@@ -29,15 +33,56 @@ namespace MarkdownReader
 
                 var htmlBase = $"<base href=\"{path}\">";
 
-                string html = htmlBase + "<!DOCTYPE html><style>body{font-family:Helvetica,Arial}</style>";
+                string html = htmlBase + "\n<!DOCTYPE html>\n<style>body{font-family:Helvetica,Arial}</style>\n";
                 html += Markdig.Markdown.ToHtml(markdown, pipeline);
 
-                browser.NavigateToString(html);
+                var newHtml = PopulateChapters(html);
+
+                browser.NavigateToString(newHtml);
             }
             catch (System.Exception ex)
             {
                 MessageBox.Show(ex.Message);
             }
+        }
+
+        private string PopulateChapters(string text)
+        {
+            //int count = 0;
+
+            var htmlArray = text.Split('\n');
+
+            Func<string, string> func = (s) =>
+            {
+                if (Regex.IsMatch(s, @"<h\d\s"))
+                {
+                    //count++;
+
+                    //s = Regex.Replace(s, @"<h(\d)\s", @"$0 href='#" + count + "' ");
+
+                    var text = Regex.Match(s, @">(.+)<").Groups[1].Value;
+
+                    var item = new TreeViewItem();
+                    item.Header = text;
+
+                    tvChapters.Items.Add(item);
+                }
+
+                return s;
+            };
+
+            var newHtml = "";
+            newHtml = htmlArray.Select(s => func(s)).ToList().Aggregate((a, b) => a + b);
+
+            return newHtml;
+        }
+
+        private void tvChapters_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            var headerText = ((TreeViewItem)tvChapters.SelectedItem).Header.ToString();
+            headerText = headerText?.ToLower().Replace(' ', '-');
+
+            //browser.InvokeScript("eval", "document.getElementById(\"" + headerText + "\").scrollIntoView();");
         }
 
         private void browser_Navigating(object sender, System.Windows.Navigation.NavigatingCancelEventArgs e)
@@ -116,5 +161,7 @@ namespace MarkdownReader
 
             DisplayFile(dataString);
         }
+
+
     }
 }

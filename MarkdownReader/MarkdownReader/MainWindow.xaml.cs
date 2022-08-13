@@ -52,17 +52,24 @@ namespace MarkdownReader
         {
             var htmlArray = text.Split('\n');
 
-            List<(string h, string t)> chapters = new List<(string, string)>();
+            List<(string h, string t, string id)> chapters = new List<(string, string, string)>();
+
+            var count = 0;
 
             Func<string, string> func = (s) =>
             {
                 if (Regex.IsMatch(s, @"<h\d\s"))
                 {
+                    count++;
+                    var id = $"heading{count}";
+
                     var h = Regex.Match(s, @"<h(\d)\s").Groups[1].Value;
 
                     var text = Regex.Match(s, @">(.+)<").Groups[1].Value;
 
-                    chapters.Add((h, text));
+                    s = Regex.Replace(s, "id=\".+\"", $"id=\"{id}\"");
+
+                    chapters.Add((h, text, id));
                 }
 
                 return s;
@@ -71,22 +78,22 @@ namespace MarkdownReader
             var newHtml = "";
             newHtml = htmlArray.Select(s => func(s)).ToList().Aggregate((a, b) => a + b);
 
-            chapters.ForEach(f => tvChapters.Items.Add(new TreeViewItem { Header = f.t }));
+            chapters.ForEach(f => tvChapters.Items.Add(new TreeViewItem
+            {
+                Header = f.t,
+                Tag = f.id,
+            }));
+
+
 
             return newHtml;
         }
 
         private void tvChapters_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            var headerText = ((TreeViewItem)tvChapters.SelectedItem).Header.ToString()?
-                .ToLower()
-                .Replace(' ', '-')
-                .Replace(":", "")
-                .Replace(",", "");
+            var tag = ((TreeViewItem)tvChapters.SelectedItem).Tag.ToString();
 
-            headerText = Regex.Replace(headerText == null ? "" : headerText, @"\.$", "");
-
-            browser.InvokeScript("ScrollTo", headerText);
+            browser.InvokeScript("ScrollTo", tag);
         }
 
         private void browser_Navigating(object sender, System.Windows.Navigation.NavigatingCancelEventArgs e)

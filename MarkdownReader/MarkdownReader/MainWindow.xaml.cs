@@ -1,6 +1,7 @@
 ﻿using Markdig;
 using Microsoft.Win32;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -33,7 +34,8 @@ namespace MarkdownReader
 
                 var htmlBase = $"<base href=\"{path}\">";
 
-                string html = htmlBase + "\n<!DOCTYPE html>\n<style>body{font-family:Helvetica,Arial}</style>\n";
+                string script = "<script>function ScrollTo(id){document.getElementById(id).scrollIntoView();}</script>\n";
+                string html = htmlBase + "\n<!DOCTYPE html>\n<style>body{font-family:Helvetica,Arial}</style>\n" + script;
                 html += Markdig.Markdown.ToHtml(markdown, pipeline);
 
                 var newHtml = PopulateChapters(html);
@@ -48,24 +50,19 @@ namespace MarkdownReader
 
         private string PopulateChapters(string text)
         {
-            //int count = 0;
-
             var htmlArray = text.Split('\n');
+
+            List<(string h, string t)> chapters = new List<(string, string)>();
 
             Func<string, string> func = (s) =>
             {
                 if (Regex.IsMatch(s, @"<h\d\s"))
                 {
-                    //count++;
-
-                    //s = Regex.Replace(s, @"<h(\d)\s", @"$0 href='#" + count + "' ");
+                    var h = Regex.Match(s, @"<h(\d)\s").Groups[1].Value;
 
                     var text = Regex.Match(s, @">(.+)<").Groups[1].Value;
 
-                    var item = new TreeViewItem();
-                    item.Header = text;
-
-                    tvChapters.Items.Add(item);
+                    chapters.Add((h, text));
                 }
 
                 return s;
@@ -74,15 +71,22 @@ namespace MarkdownReader
             var newHtml = "";
             newHtml = htmlArray.Select(s => func(s)).ToList().Aggregate((a, b) => a + b);
 
+            chapters.ForEach(f => tvChapters.Items.Add(new TreeViewItem { Header = f.t }));
+
             return newHtml;
         }
 
         private void tvChapters_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            var headerText = ((TreeViewItem)tvChapters.SelectedItem).Header.ToString();
-            headerText = headerText?.ToLower().Replace(' ', '-');
+            var headerText = ((TreeViewItem)tvChapters.SelectedItem).Header.ToString()?
+                .ToLower()
+                .Replace(' ', '-')
+                .Replace(":", "")
+                .Replace(",", "");
 
-            //browser.InvokeScript("eval", "document.getElementById(\"" + headerText + "\").scrollIntoView();");
+            headerText = Regex.Replace(headerText == null ? "" : headerText, @"\.$", "");
+
+            browser.InvokeScript("ScrollTo", headerText);
         }
 
         private void browser_Navigating(object sender, System.Windows.Navigation.NavigatingCancelEventArgs e)

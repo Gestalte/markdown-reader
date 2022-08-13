@@ -32,8 +32,7 @@ namespace MarkdownReader
                     .UseMediaLinks()
                     .Build();
 
-                var htmlBase = $"<base href=\"{path}\">";
-
+                string htmlBase = $"<base href=\"{path}\">";
                 string script = "<script>function ScrollTo(id){document.getElementById(id).scrollIntoView();}</script>\n";
                 string html = htmlBase + "\n<!DOCTYPE html>\n<style>body{font-family:Helvetica,Arial}</style>\n" + script;
                 html += Markdig.Markdown.ToHtml(markdown, pipeline);
@@ -50,50 +49,56 @@ namespace MarkdownReader
 
         private string PopulateChapters(string text)
         {
-            var htmlArray = text.Split('\n');
+            tvChapters.Items.Clear();            
 
-            List<(string h, string t, string id)> chapters = new List<(string, string, string)>();
-
+            List<(string htag, string text, string id)> chapters = new List<(string, string, string)>();
             var count = 0;
 
-            Func<string, string> func = (s) =>
+            Func<string, string> formatHeadingsAndGetChapters = (s) =>
             {
                 if (Regex.IsMatch(s, @"<h\d\s"))
                 {
+                    // used to make unique ids for the headers to avoid headers
+                    // with the same text from all scrolling to the same occurance.
                     count++;
                     var id = $"heading{count}";
-
-                    var h = Regex.Match(s, @"<h(\d)\s").Groups[1].Value;
-
-                    var text = Regex.Match(s, @">(.+)<").Groups[1].Value;
-
                     s = Regex.Replace(s, "id=\".+\"", $"id=\"{id}\"");
 
-                    chapters.Add((h, text, id));
+                    // header tag eg. h1
+                    var htag = Regex.Match(s, @"<h(\d)\s").Groups[1].Value;
+                    var text = Regex.Match(s, @">(.+)<").Groups[1].Value;
+
+                    chapters.Add((htag, text, id));
                 }
 
                 return s;
             };
 
-            var newHtml = "";
-            newHtml = htmlArray.Select(s => func(s)).ToList().Aggregate((a, b) => a + b);
+            var htmlLines = text.Split('\n');
 
-            chapters.ForEach(f => tvChapters.Items.Add(new TreeViewItem
+            var newHtml = htmlLines
+                .Select(s => formatHeadingsAndGetChapters(s))
+                .Aggregate((a, b) => a + b);
+
+            chapters.ForEach(chapter => tvChapters.Items.Add(new TreeViewItem
             {
-                Header = f.t,
-                Tag = f.id,
+                Header = chapter.text,
+                Tag = chapter.id,
             }));
-
-
 
             return newHtml;
         }
 
         private void tvChapters_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            var tag = ((TreeViewItem)tvChapters.SelectedItem).Tag.ToString();
+            var selectedItem = (TreeViewItem)tvChapters.SelectedItem;
 
-            browser.InvokeScript("ScrollTo", tag);
+            if (selectedItem==null)
+            {
+                return;
+            }
+
+            browser.InvokeScript("ScrollTo", selectedItem.Tag.ToString());
         }
 
         private void browser_Navigating(object sender, System.Windows.Navigation.NavigatingCancelEventArgs e)
@@ -172,7 +177,5 @@ namespace MarkdownReader
 
             DisplayFile(dataString);
         }
-
-
     }
 }

@@ -8,10 +8,16 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Media;
 
 namespace MarkdownReader
 {
+    public class TreeViewItemExpanded : TreeViewItem
+    {
+        public TreeViewItemExpanded Parent { get; set; }
+    }
+
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -49,9 +55,9 @@ namespace MarkdownReader
 
         private string PopulateChapters(string text)
         {
-            tvChapters.Items.Clear();            
+            tvChapters.Items.Clear();
 
-            List<(string htag, string text, string id)> chapters = new List<(string, string, string)>();
+            List<(int htag, string text, string id)> chapters = new List<(int, string, string)>();
             var count = 0;
 
             Func<string, string> formatHeadingsAndGetChapters = (s) =>
@@ -68,7 +74,7 @@ namespace MarkdownReader
                     var htag = Regex.Match(s, @"<h(\d)\s").Groups[1].Value;
                     var text = Regex.Match(s, @">(.+)<").Groups[1].Value;
 
-                    chapters.Add((htag, text, id));
+                    chapters.Add((int.Parse(htag), text, id));
                 }
 
                 return s;
@@ -80,11 +86,17 @@ namespace MarkdownReader
                 .Select(s => formatHeadingsAndGetChapters(s))
                 .Aggregate((a, b) => a + b);
 
-            chapters.ForEach(chapter => tvChapters.Items.Add(new TreeViewItem
-            {
-                Header = chapter.text,
-                Tag = chapter.id,
-            }));
+            //chapters.ForEach(chapter => tvChapters.Items.Add(new TreeViewItem
+            //{
+            //    Header = chapter.text,
+            //    Tag = chapter.id,
+            //}));
+
+            var treeResult = buildTree(new TreeViewItemExpanded { Header = "root" }, chapters, 0);
+
+            TreeViewItem x = findRoot(treeResult);
+
+            tvChapters.Items.Add(x);
 
             return newHtml;
         }
@@ -93,7 +105,7 @@ namespace MarkdownReader
         {
             var selectedItem = (TreeViewItem)tvChapters.SelectedItem;
 
-            if (selectedItem==null)
+            if (selectedItem == null)
             {
                 return;
             }
@@ -177,5 +189,74 @@ namespace MarkdownReader
 
             DisplayFile(dataString);
         }
+
+        Func<TreeViewItemExpanded, TreeViewItemExpanded, TreeViewItemExpanded> cons = (t1, t2) =>
+        {
+            t1.Items.Add(t2);
+            return t2;
+        };
+
+        Func<List<(int htag, string text, string id)>, (int htag, string text, string id)> car = (lst)
+            => lst.First();
+
+        Func<List<(int htag, string text, string id)>, List<(int htag, string text, string id)>> cdr = (lst)
+            => lst.Skip(1).ToList();
+
+        TreeViewItemExpanded buildTree(TreeViewItemExpanded tree, List<(int htag, string text, string id)> list, int oldLevel)
+        {
+            if (list.Count == 0)
+            {
+                return tree;
+            }
+
+            var c = car(list);
+
+            if (c.htag > oldLevel)
+            {
+                var t = new TreeViewItemExpanded
+                {
+                    Header = c.text,
+                    Parent = tree,
+                    Tag=c.id
+                };
+
+                return buildTree(cons(tree, t), cdr(list), c.htag);
+            }
+            else if (c.htag == oldLevel)
+            {
+                var t = new TreeViewItemExpanded
+                {
+                    Header = c.text,
+                    Parent = tree.Parent,
+                    Tag = c.id
+                };
+
+                tree.Parent.Items.Add(t);
+
+                return buildTree(t, cdr(list), c.htag);
+            }
+            else if (c.htag < oldLevel) // TODO: This part doesn't work right.
+            { // TODO: Figure out how to move up exact levels eg. from 5 to 2 instead of always going up one level.
+                var t = new TreeViewItemExpanded
+                {
+                    Header = c.text,
+                    Parent = tree.Parent.Parent,
+                    Tag = c.id
+                };
+
+                tree.Parent.Parent.Items.Add(t);
+
+                return buildTree(t, cdr(list), c.htag);
+            }
+
+            return tree;
+        }
+
+        TreeViewItemExpanded findRoot(TreeViewItemExpanded t)
+        => t.Parent.Header switch
+        {
+            "root" => t.Parent,
+            _ => findRoot(t.Parent)
+        };
     }
 }

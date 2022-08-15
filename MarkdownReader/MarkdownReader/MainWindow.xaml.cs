@@ -16,6 +16,7 @@ namespace MarkdownReader
     public class TreeViewItemExpanded : TreeViewItem
     {
         public TreeViewItemExpanded Parent { get; set; }
+        public int Level { get; set; }
     }
 
     /// <summary>
@@ -86,19 +87,25 @@ namespace MarkdownReader
                 .Select(s => formatHeadingsAndGetChapters(s))
                 .Aggregate((a, b) => a + b);
 
-            //chapters.ForEach(chapter => tvChapters.Items.Add(new TreeViewItem
-            //{
-            //    Header = chapter.text,
-            //    Tag = chapter.id,
-            //}));
-
             var treeResult = buildTree(new TreeViewItemExpanded { Header = "root" }, chapters, 0);
 
             TreeViewItem x = findRoot(treeResult);
 
+            Expand(x);
+
             tvChapters.Items.Add(x);
 
             return newHtml;
+        }
+
+        void Expand(TreeViewItem item)
+        {
+            item.IsExpanded = true;
+
+            foreach (TreeViewItem i in item.Items)
+            {
+                Expand(i);
+            }
         }
 
         private void tvChapters_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
@@ -217,7 +224,8 @@ namespace MarkdownReader
                 {
                     Header = c.text,
                     Parent = tree,
-                    Tag=c.id
+                    Tag=c.id,
+                    Level= c.htag
                 };
 
                 return buildTree(cons(tree, t), cdr(list), c.htag);
@@ -228,7 +236,8 @@ namespace MarkdownReader
                 {
                     Header = c.text,
                     Parent = tree.Parent,
-                    Tag = c.id
+                    Tag = c.id,
+                    Level = c.htag
                 };
 
                 tree.Parent.Items.Add(t);
@@ -237,14 +246,34 @@ namespace MarkdownReader
             }
             else if (c.htag < oldLevel) // TODO: This part doesn't work right.
             { // TODO: Figure out how to move up exact levels eg. from 5 to 2 instead of always going up one level.
+
+                TreeViewItemExpanded findParent(int lvl, TreeViewItemExpanded currTree)
+                {
+                    if (currTree.Parent == null) { return currTree; }
+
+                    if (currTree.Parent.Level < lvl)
+                    {
+                        return currTree.Parent;
+                    }
+                    else if (currTree.Parent.Level >= lvl)
+                    {
+                        return findParent(lvl, currTree.Parent);
+                    }
+
+                    return currTree;
+                };
+
+                var Parent = findParent(c.htag, tree);
+
                 var t = new TreeViewItemExpanded
                 {
                     Header = c.text,
-                    Parent = tree.Parent.Parent,
-                    Tag = c.id
+                    Parent = Parent,
+                    Tag = c.id,
+                    Level = c.htag
                 };
 
-                tree.Parent.Parent.Items.Add(t);
+                Parent.Items.Add(t);
 
                 return buildTree(t, cdr(list), c.htag);
             }

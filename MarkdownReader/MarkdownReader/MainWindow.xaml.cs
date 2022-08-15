@@ -87,20 +87,13 @@ namespace MarkdownReader
                 .Select(s => formatHeadingsAndGetChapters(s))
                 .Aggregate((a, b) => a + "\n" + b);
 
-            var treeResult = BuildTree(new TreeViewItemExpanded { Header = "root" }, chapters, 0);
+            var treeResult = BuildTree(new TreeViewItemExpanded { Header = "<root>" }, chapters, 0);
 
             TreeViewItem rootItem = FindRoot(treeResult);
 
-            // Remove root element.
-            List<TreeViewItem> rootItemItems = rootItem.Items.Cast<TreeViewItem>().ToList();
-            // removes items from root's Items so they no longer have a logical
-            // parent and can be added to tvChapters' Items
-            rootItemItems.ForEach(f => rootItem.Items.Remove(f));
-            var withoutRoot = rootItemItems.First();
+            ExpandTreeViewStructure(rootItem);
 
-            ExpandTreeViewStructure(withoutRoot);
-
-            tvChapters.Items.Add(withoutRoot);
+            tvChapters.Items.Add(rootItem);
 
             return newHtml;
         }
@@ -109,7 +102,7 @@ namespace MarkdownReader
         {
             var selectedItem = (TreeViewItem)tvChapters.SelectedItem;
 
-            if (selectedItem == null)
+            if (selectedItem == null || selectedItem.Header == "<root>")
             {
                 return;
             }
@@ -270,7 +263,7 @@ namespace MarkdownReader
         private TreeViewItemExpanded FindRoot(TreeViewItemExpanded t)
             => t.Parent.Header switch
             {
-                "root" => t.Parent,
+                "<root>" => t.Parent,
                 _ => FindRoot(t.Parent)
             };
 

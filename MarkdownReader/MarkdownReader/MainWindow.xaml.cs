@@ -15,7 +15,7 @@ namespace MarkdownReader
 {
     public class TreeViewItemExpanded : TreeViewItem
     {
-        public TreeViewItemExpanded Parent { get; set; }
+        public new TreeViewItemExpanded? Parent { get; set; }
         public int Level { get; set; }
     }
 
@@ -87,16 +87,18 @@ namespace MarkdownReader
                 .Select(s => formatHeadingsAndGetChapters(s))
                 .Aggregate((a, b) => a + "\n" + b);
 
-            var treeResult = buildTree(new TreeViewItemExpanded { Header = "root" }, chapters, 0);
+            var treeResult = BuildTree(new TreeViewItemExpanded { Header = "root" }, chapters, 0);
 
-            TreeViewItem x = findRoot(treeResult);
-
-            Expand(x);
+            TreeViewItem rootItem = FindRoot(treeResult);
 
             // Remove root element.
-            List<TreeViewItem> y = x.Items.Cast<TreeViewItem>().ToList();
-            y.ForEach(f => x.Items.Remove(f));
-            var withoutRoot = y.First();
+            List<TreeViewItem> rootItemItems = rootItem.Items.Cast<TreeViewItem>().ToList();
+            // removes items from root's Items so they no longer have a logical
+            // parent and can be added to tvChapters' Items
+            rootItemItems.ForEach(f => rootItem.Items.Remove(f));
+            var withoutRoot = rootItemItems.First();
+
+            ExpandTreeViewStructure(withoutRoot);
 
             tvChapters.Items.Add(withoutRoot);
 
@@ -130,10 +132,11 @@ namespace MarkdownReader
                 try
                 {
                     // Attempt to follow link in MD file by opening it in the default browser.
-                    ProcessStartInfo psi = new ProcessStartInfo();
-
-                    psi.FileName = e.Uri.ToString();
-                    psi.UseShellExecute = true;
+                    ProcessStartInfo psi = new()
+                    {
+                        FileName = e.Uri.ToString(),
+                        UseShellExecute = true
+                    };
 
                     Process.Start(psi);
                 }
@@ -161,11 +164,9 @@ namespace MarkdownReader
                 path = path.Substring(8);
             }
 
-            string filepath = path;
+            pathToFile.Text = path;
 
-            pathToFile.Text = filepath;
-
-            string markdown = File.ReadAllText(filepath);
+            string markdown = File.ReadAllText(path);
 
             loadMarkdown(markdown, path);
         }
@@ -204,92 +205,82 @@ namespace MarkdownReader
         Func<List<(int htag, string text, string id)>, List<(int htag, string text, string id)>> cdr = (lst)
             => lst.Skip(1).ToList();
 
-        TreeViewItemExpanded buildTree(TreeViewItemExpanded tree, List<(int htag, string text, string id)> list, int oldLevel)
+        TreeViewItemExpanded BuildTree(TreeViewItemExpanded tree, List<(int htag, string text, string id)> list, int oldLevel)
         {
+            Func<(int htag, string text, string id), TreeViewItemExpanded, TreeViewItemExpanded> makeTree = (item, parent)
+                => new TreeViewItemExpanded
+                {
+                    Header = item.text,
+                    Parent = parent,
+                    Tag = item.id,
+                    Level = item.htag
+                };
+
             if (list.Count == 0)
             {
                 return tree;
             }
 
-            var c = car(list);
+            var firstListItem = car(list);
 
-            if (c.htag > oldLevel)
+            if (firstListItem.htag > oldLevel)
             {
-                var t = new TreeViewItemExpanded
-                {
-                    Header = c.text,
-                    Parent = tree,
-                    Tag = c.id,
-                    Level = c.htag
-                };
+                var newTree = makeTree(firstListItem, tree);
 
-                return buildTree(cons(tree, t), cdr(list), c.htag);
+                return BuildTree(cons(tree, newTree), cdr(list), firstListItem.htag);
             }
-            else if (c.htag == oldLevel)
+            else if (firstListItem.htag == oldLevel)
             {
-                var t = new TreeViewItemExpanded
-                {
-                    Header = c.text,
-                    Parent = tree.Parent,
-                    Tag = c.id,
-                    Level = c.htag
-                };
+                var newTree = makeTree(firstListItem, tree.Parent);
 
-                tree.Parent.Items.Add(t);
+                tree.Parent.Items.Add(newTree);
 
-                return buildTree(t, cdr(list), c.htag);
+                return BuildTree(newTree, cdr(list), firstListItem.htag);
             }
-            else if (c.htag < oldLevel) // TODO: This part doesn't work right.
-            { // TODO: Figure out how to move up exact levels eg. from 5 to 2 instead of always going up one level.
+            else if (firstListItem.htag < oldLevel)
+            {
+                var Parent = FindParent(firstListItem.htag, tree);
 
-                TreeViewItemExpanded findParent(int lvl, TreeViewItemExpanded currTree)
-                {
-                    if (currTree.Parent == null) { return currTree; }
+                var newtree = makeTree(firstListItem, Parent);
 
-                    if (currTree.Parent.Level < lvl)
-                    {
-                        return currTree.Parent;
-                    }
-                    else if (currTree.Parent.Level >= lvl)
-                    {
-                        return findParent(lvl, currTree.Parent);
-                    }
+                Parent.Items.Add(newtree);
 
-                    return currTree;
-                };
-
-                var Parent = findParent(c.htag, tree);
-
-                var t = new TreeViewItemExpanded
-                {
-                    Header = c.text,
-                    Parent = Parent,
-                    Tag = c.id,
-                    Level = c.htag
-                };
-
-                Parent.Items.Add(t);
-
-                return buildTree(t, cdr(list), c.htag);
+                return BuildTree(newtree, cdr(list), firstListItem.htag);
             }
 
             return tree;
         }
 
-        TreeViewItemExpanded findRoot(TreeViewItemExpanded t)
-        => t.Parent.Header switch
+        private static TreeViewItemExpanded FindParent(int lvl, TreeViewItemExpanded currentTree)
         {
-            "root" => t.Parent,
-            _ => findRoot(t.Parent)
-        };
+            if (currentTree.Parent == null) { return currentTree; }
 
-        void Expand(TreeViewItem item)
+            if (currentTree.Parent.Level < lvl)
+            {
+                return currentTree.Parent;
+            }
+            else if (currentTree.Parent.Level >= lvl)
+            {
+                return FindParent(lvl, currentTree.Parent);
+            }
+
+            return currentTree;
+        }
+
+        private TreeViewItemExpanded FindRoot(TreeViewItemExpanded t)
+            => t.Parent.Header switch
+            {
+                "root" => t.Parent,
+                _ => FindRoot(t.Parent)
+            };
+
+        void ExpandTreeViewStructure(TreeViewItem item)
         {
             item.IsExpanded = true;
 
             foreach (TreeViewItem i in item.Items)
             {
-                Expand(i);
+                ExpandTreeViewStructure(i);
             }
         }
     }

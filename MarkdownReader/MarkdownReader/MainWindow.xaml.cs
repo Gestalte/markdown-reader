@@ -85,7 +85,7 @@ namespace MarkdownReader
 
             var newHtml = htmlLines
                 .Select(s => formatHeadingsAndGetChapters(s))
-                .Aggregate((a, b) => a +"\n"+ b);
+                .Aggregate((a, b) => a + "\n" + b);
 
             var treeResult = buildTree(new TreeViewItemExpanded { Header = "root" }, chapters, 0);
 
@@ -93,7 +93,12 @@ namespace MarkdownReader
 
             Expand(x);
 
-            tvChapters.Items.Add(x);
+            // Remove root element.
+            List<TreeViewItem> y = x.Items.Cast<TreeViewItem>().ToList();
+            y.ForEach(f => x.Items.Remove(f));
+            var withoutRoot = y.First();
+
+            tvChapters.Items.Add(withoutRoot);
 
             return newHtml;
         }
@@ -214,8 +219,8 @@ namespace MarkdownReader
                 {
                     Header = c.text,
                     Parent = tree,
-                    Tag=c.id,
-                    Level= c.htag
+                    Tag = c.id,
+                    Level = c.htag
                 };
 
                 return buildTree(cons(tree, t), cdr(list), c.htag);

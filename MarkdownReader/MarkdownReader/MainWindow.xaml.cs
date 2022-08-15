@@ -85,7 +85,7 @@ namespace MarkdownReader
 
             var newHtml = htmlLines
                 .Select(s => formatHeadingsAndGetChapters(s))
-                .Aggregate((a, b) => a + b);
+                .Aggregate((a, b) => a +"\n"+ b);
 
             var treeResult = buildTree(new TreeViewItemExpanded { Header = "root" }, chapters, 0);
 
@@ -96,16 +96,6 @@ namespace MarkdownReader
             tvChapters.Items.Add(x);
 
             return newHtml;
-        }
-
-        void Expand(TreeViewItem item)
-        {
-            item.IsExpanded = true;
-
-            foreach (TreeViewItem i in item.Items)
-            {
-                Expand(i);
-            }
         }
 
         private void tvChapters_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
@@ -287,5 +277,15 @@ namespace MarkdownReader
             "root" => t.Parent,
             _ => findRoot(t.Parent)
         };
+
+        void Expand(TreeViewItem item)
+        {
+            item.IsExpanded = true;
+
+            foreach (TreeViewItem i in item.Items)
+            {
+                Expand(i);
+            }
+        }
     }
 }

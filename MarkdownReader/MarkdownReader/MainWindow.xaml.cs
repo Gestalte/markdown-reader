@@ -29,8 +29,17 @@ namespace MarkdownReader
             InitializeComponent();
         }
 
+        private void DisplayTitle(string path)
+        {
+            var title = Path.GetFileNameWithoutExtension(path);
+
+            this.Title = title;
+        }
+
         private void loadMarkdown(string markdown, string path)
         {
+            DisplayTitle(path);
+
             try
             {
                 var pipeline = new MarkdownPipelineBuilder()

@@ -27,6 +27,15 @@ namespace MarkdownReader
         public MainWindow()
         {
             InitializeComponent();
+
+            // This allows you to drag a .md file onto the exe or shortcut of
+            // this program and it will automatically be loaded.
+            var args = Environment.GetCommandLineArgs();
+
+            if (args?.Length > 1)
+            {
+                DisplayFile(args[1]);
+            }
         }
 
         private void DisplayTitle(string path)

@@ -27,9 +27,9 @@
             <TextBox Name="pathToFile" AcceptsReturn="True" />
         </DockPanel>
 
-        <TreeView x:Name="tvChapters" Grid.Column="0" Grid.Row="1" SelectedItemChanged="tvChapters_SelectedItemChanged"/>
+        <TreeView x:Name="tvChapters" Grid.Column="0" Grid.Row="1" SelectedItemChanged="TvChapters_SelectedItemChanged"/>
 
-        <WebBrowser DragDrop.Drop="Grid_Drop" Grid.Column="1" Grid.Row="1" Navigating="browser_Navigating" Name="browser"></WebBrowser>
+        <WebBrowser DragDrop.Drop="Grid_Drop" Grid.Column="1" Grid.Row="1" Navigating="Browser_Navigating" Name="browser"></WebBrowser>
 
     </Grid>
 </Window>

@@ -259,7 +259,7 @@ namespace MarkdownReader
 
             return tree;
         }
-        
+
         private static TreeViewItemExpanded FindParent(int lvl, TreeViewItemExpanded currentTree)
         {
             if (currentTree.Parent == null) { return currentTree; }
@@ -277,11 +277,20 @@ namespace MarkdownReader
         }
 
         private TreeViewItemExpanded FindRoot(TreeViewItemExpanded t)
-            => t.Parent!.Header switch
+        {
+            if (t.Header.ToString() == "<root>")
+            {
+                return t;
+            }
+
+            return t.Parent!.Header switch
             {
                 "<root>" => t.Parent,
                 _ => FindRoot(t.Parent)
             };
+        }
+
+
 
         void ExpandTreeViewStructure(TreeViewItem item)
         {

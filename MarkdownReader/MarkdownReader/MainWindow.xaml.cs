@@ -1,4 +1,5 @@
 ﻿using Markdig;
+using Markdig.Extensions.Tables;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -59,7 +60,7 @@ namespace MarkdownReader
 
                 string htmlBase = $"<base href=\"{path}\">";
                 string script = "<script>function ScrollTo(id){document.getElementById(id).scrollIntoView();}</script>\n";
-                string html = htmlBase + "\n<!DOCTYPE html>\n<style>body{font-family:Helvetica,Arial}</style>\n" + script;
+                string html = htmlBase + "\n<!DOCTYPE html>\n<style>body{font-family:Helvetica,Arial}table, th, td {border-collapse: collapse; border: 1px solid black;padding:.5em;}</style>\n" + script;
                 html += Markdig.Markdown.ToHtml(markdown, pipeline);
 
                 var newHtml = PopulateChapters(html);

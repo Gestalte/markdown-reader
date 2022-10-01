@@ -45,15 +45,15 @@ jobs:
       uses: TheDoctor0/zip-release@0.6.2
       with:
         # Filename for archive
-        filename: MarkdownReader.zip
+        filename: 'MarkdownReader.zip'
         # Base path for archive files
-        path: MarkdownReader\MarkdownReader\bin\x64\Release\net6.0-windows
+        path: 'MarkdownReader\MarkdownReader\bin\x64\Release\net6.0-windows\'
         # Working directory before zipping
         directory: .
         # Tool to use for archiving
-        type: zip
+        type: 'zip'
 
     - uses: actions/upload-artifact@v3
       with:
         name: MarkdownReader.zip
-        path: MarkdownReader\MarkdownReader\bin\x64\Release\net6.0-windows/MarkdownReader.zip
+        path: MarkdownReader\MarkdownReader\bin\x64\Release\net6.0-windows\MarkdownReader.zip

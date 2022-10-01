@@ -52,8 +52,8 @@ jobs:
         directory: .
         # Tool to use for archiving
         type: 'zip'
-
+ 
     - uses: actions/upload-artifact@v3
       with:
         name: MarkdownReader.zip
-        path: MarkdownReader\MarkdownReader\bin\x64\Release\net6.0-windows\MarkdownReader.zip
+        path: D:\a\markdown-reader\markdown-reader\MarkdownReader\MarkdownReader\bin\Release\net6.0-windows\MarkdownReader.zip

@@ -47,7 +47,7 @@ jobs:
         # Filename for archive
         filename: 'MarkdownReader.zip'
         # Base path for archive files
-        path: 'MarkdownReader\MarkdownReader\bin\x64\Release\net6.0-windows\'
+        path: 'markdown-reader\MarkdownReader\MarkdownReader\bin\Release\net6.0-windows\'
         # Working directory before zipping
         directory: .
         # Tool to use for archiving

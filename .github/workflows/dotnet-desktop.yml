@@ -45,7 +45,7 @@ jobs:
       uses: vimtor/action-zip@v1
       with:
         # Files or directories to zip
-        files: MarkdownReader\MarkdownReader\bin\x64\Release\net6.0-windows\
+        files: /MarkdownReader/MarkdownReader/bin/x64/Release/net6.0-windows/
         # Name of output zip file
         dest: MarkdownReader.zip
         # Whether to add subdirectories to simply zip all files to the root

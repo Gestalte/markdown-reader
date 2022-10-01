@@ -38,22 +38,13 @@ jobs:
     # Execute all unit tests in the solution
     - name: Execute unit tests
       run: dotnet test MarkdownReader\MarkdownReader.UnitTests\MarkdownReader.UnitTests.csproj
-      
-    - name: Zip Release
-      # You may pin to the exact commit or the version.
-      # uses: TheDoctor0/zip-release@09336613be18a8208dfa66bd57efafd9e2685657
-      uses: TheDoctor0/zip-release@0.6.2
-      with:
-        # Filename for archive
-        filename: 'MarkdownReader.zip'
-        # Base path for archive files
-        path: 'D:\a\markdown-reader\markdown-reader\MarkdownReader\MarkdownReader\bin\Release\net6.0-windows\'
-        # Working directory before zipping
-        directory: .
-        # Tool to use for archiving
-        type: 'zip'
  
     - uses: actions/upload-artifact@v3
       with:
         name: MarkdownReader.zip
-        path: 'MarkdownReader.zip'
+        path: 'D:\a\markdown-reader\markdown-reader\MarkdownReader\MarkdownReader\bin\Release\net6.0-windows\'
+        
+    - uses: actions/download-artifact@v3
+      with:
+        name: MarkdownReader.zip
+        path: MarkdownReader.zip

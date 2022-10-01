@@ -56,4 +56,4 @@ jobs:
     - uses: actions/upload-artifact@v3
       with:
         name: MarkdownReader.zip
-        path: 'D:\a\markdown-reader\markdown-reader\MarkdownReader\MarkdownReader\bin\Release\net6.0-windows\MarkdownReader.zip'
+        path: 'MarkdownReader.zip'

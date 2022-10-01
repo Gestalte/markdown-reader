@@ -31,9 +31,9 @@ jobs:
 
     - name: Restore
       run: dotnet restore MarkdownReader\MarkdownReader\MarkdownReader.csproj
-      
+
     - name: Build
-      run: dotnet build MarkdownReader\MarkdownReader.UnitTests\MarkdownReader.UnitTests.csproj --configuration Release
+      run: dotnet build MarkdownReader\MarkdownReader\MarkdownReader.csproj --configuration Release --no-restore
 
     # Execute all unit tests in the solution
     - name: Execute unit tests
@@ -45,7 +45,7 @@ jobs:
       uses: vimtor/action-zip@v1
       with:
         # Files or directories to zip
-        files: /MarkdownReader/MarkdownReader/bin/x64/Release/net6.0-windows/
+        files: MarkdownReader\MarkdownReader\bin\x64\Release\net6.0-windows
         # Name of output zip file
         dest: MarkdownReader.zip
         # Whether to add subdirectories to simply zip all files to the root

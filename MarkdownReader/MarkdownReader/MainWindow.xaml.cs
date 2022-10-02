@@ -1,5 +1,4 @@
 ﻿using Markdig;
-using Markdig.Extensions.Tables;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -9,8 +8,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Media;
 
 namespace MarkdownReader
 {
@@ -84,8 +81,8 @@ namespace MarkdownReader
             {
                 if (Regex.IsMatch(s, @"<h\d\s"))
                 {
-                    // used to make unique ids for the headers to avoid headers
-                    // with the same text from all scrolling to the same occurance.
+                    // used to make unique ids for the headers to avoid headers,
+                    // with the same text, from all scrolling to the same occurance.
                     count++;
                     var id = $"heading{count}";
                     s = Regex.Replace(s, "id=\".+\"", $"id=\"{id}\"");

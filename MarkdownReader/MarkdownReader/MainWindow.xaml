@@ -27,10 +27,10 @@
                     <MenuItem Header="_Exit" Click="MenuItem_Click_Exit" />
                 </MenuItem>
             </Menu>
-            <TextBox Name="pathToFile" AcceptsReturn="True" />
+            <TextBox Text="{Binding FilePath}" AcceptsReturn="True" />
         </DockPanel>
 
-        <TreeView x:Name="tvChapters" Grid.Column="0" Grid.Row="1" SelectedItemChanged="TvChapters_SelectedItemChanged" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
+        <TreeView x:Name="tvChapters" ItemsSource="{Binding SideBarChapters}" Grid.Column="0" Grid.Row="1" SelectedItemChanged="TvChapters_SelectedItemChanged" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
 
         <GridSplitter Grid.Row="1" Grid.Column="1" Width="1" VerticalAlignment="Stretch" HorizontalAlignment="Center"/>
 

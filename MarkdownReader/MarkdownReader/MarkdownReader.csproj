@@ -8,6 +8,7 @@
     <PlatformTarget>x64</PlatformTarget>
     <Platforms>AnyCPU;x64</Platforms>
     <ApplicationIcon>markdown.ico</ApplicationIcon>
+    <Version>$(VersionPrefix)1.0.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

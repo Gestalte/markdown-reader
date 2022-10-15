@@ -14,8 +14,12 @@ namespace MarkdownReader
 {
     public class MainWindowViewModel : INotifyPropertyChanged
     {
-        public MainWindowViewModel()
+        private readonly TreeviewBuilder treeviewBuilder;
+
+        public MainWindowViewModel(TreeviewBuilder treeviewBuilder)
         {
+            this.treeviewBuilder = treeviewBuilder;
+
             FilePath = null;
             Title = null;
             Html = null;
@@ -104,7 +108,6 @@ namespace MarkdownReader
 
                 var newHtml = PopulateSideBarChapters(html);
 
-                //browser.NavigateToString(newHtml);
                 Html = newHtml;
             }
             catch (System.Exception ex)
@@ -146,13 +149,12 @@ namespace MarkdownReader
                 .Select(s => formatHeadingsAndGetChapters(s))
                 .Aggregate((a, b) => a + "\n" + b);
 
-            var treeResult = BuildTree(new TreeViewItemExpanded { Header = "<root>" }, chapters, 0);
+            var treeResult = this.treeviewBuilder.BuildTree(new TreeViewItemExpanded { Header = "<root>" }, chapters, 0);
 
-            TreeViewItem rootItem = FindRoot(treeResult);
+            TreeViewItem rootItem = this.treeviewBuilder.FindRoot(treeResult);
 
-            ExpandTreeViewStructure(rootItem);
+            this.treeviewBuilder.ExpandTreeViewStructure(rootItem);
 
-            //tvChapters.Items.Add(rootItem);
             SideBarChapters.Add(rootItem);
 
             return newHtml;
@@ -174,102 +176,6 @@ namespace MarkdownReader
             string markdown = File.ReadAllText(path);
 
             GenerateMarkdown(markdown, path);
-        }
-
-        private static TreeViewItemExpanded MakeTree
-            ((int htag, string text, string id) item, TreeViewItemExpanded parent)
-            => new()
-            {
-                Header = item.text,
-                Parent = parent,
-                Tag = item.id,
-                Level = item.htag
-            };
-
-        private TreeViewItemExpanded BuildTree
-            (TreeViewItemExpanded tree
-            , List<(int htag, string text, string id)> list
-            , int oldLevel
-            )
-        {
-            if (list.Count == 0)
-            {
-                return tree;
-            }
-
-            var firstListItem = list.First();
-            var restOfListItems = list.Skip(1).ToList();
-
-            // NOTE: Larger htags should be inside smaller htags.
-
-            if (firstListItem.htag > oldLevel)
-            {
-                var newTree = MakeTree(firstListItem, tree);
-
-                tree.Items.Add(newTree);
-
-                return BuildTree(newTree, restOfListItems, firstListItem.htag);
-            }
-            else if (firstListItem.htag == oldLevel)
-            {
-                var newTree = MakeTree(firstListItem, tree.Parent!);
-
-                tree.Parent!.Items.Add(newTree);
-
-                return BuildTree(newTree, restOfListItems, firstListItem.htag);
-            }
-            else if (firstListItem.htag < oldLevel)
-            {
-                var Parent = FindParent(firstListItem.htag, tree);
-
-                var newtree = MakeTree(firstListItem, Parent);
-
-                Parent.Items.Add(newtree);
-
-                return BuildTree(newtree, restOfListItems, firstListItem.htag);
-            }
-
-            return tree;
-        }
-
-        private static TreeViewItemExpanded FindParent(int lvl, TreeViewItemExpanded currentTree)
-        {
-            if (currentTree.Parent == null) { return currentTree; }
-
-            if (currentTree.Parent.Level < lvl)
-            {
-                return currentTree.Parent;
-            }
-            else if (currentTree.Parent.Level >= lvl)
-            {
-                return FindParent(lvl, currentTree.Parent);
-            }
-
-            return currentTree;
-        }
-
-        private TreeViewItemExpanded FindRoot(TreeViewItemExpanded t)
-        {
-            if (t.Header.ToString() == "<root>")
-            {
-                return t;
-            }
-
-            return t.Parent!.Header switch
-            {
-                "<root>" => t.Parent,
-                _ => FindRoot(t.Parent)
-            };
-        }
-
-        private void ExpandTreeViewStructure(TreeViewItem item)
-        {
-            item.IsExpanded = true;
-
-            foreach (TreeViewItem i in item.Items)
-            {
-                ExpandTreeViewStructure(i);
-            }
         }
     }
 }

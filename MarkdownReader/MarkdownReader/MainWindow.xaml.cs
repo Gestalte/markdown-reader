@@ -12,7 +12,7 @@ namespace MarkdownReader
     /// </summary>
     public partial class MainWindow : Window
     {
-        readonly MainWindowViewModel ViewModel = new();
+        readonly MainWindowViewModel ViewModel = new(new TreeviewBuilder());
 
         public MainWindow()
         {

@@ -78,16 +78,16 @@ namespace MarkdownReader
             HtmlChanged?.Invoke(this, e);
         }
 
-        private void DisplayTitle(string path)
+        private void SetTitle(string path)
         {
             var title = Path.GetFileNameWithoutExtension(path);
 
             Title = title;
         }
 
-        private void LoadMarkdown(string markdown, string path)
+        private void GenerateMarkdown(string markdown, string path)
         {
-            DisplayTitle(path);
+            SetTitle(path);
 
             try
             {
@@ -102,7 +102,7 @@ namespace MarkdownReader
                 string html = htmlBase + "\n<!DOCTYPE html>\n<style>body{font-family:Helvetica,Arial}table, th, td {border-collapse: collapse; border: 1px solid black;padding:.5em;}</style>\n" + script;
                 html += Markdig.Markdown.ToHtml(markdown, pipeline);
 
-                var newHtml = PopulateChapters(html);
+                var newHtml = PopulateSideBarChapters(html);
 
                 //browser.NavigateToString(newHtml);
                 Html = newHtml;
@@ -113,9 +113,8 @@ namespace MarkdownReader
             }
         }
 
-        private string PopulateChapters(string text)
+        private string PopulateSideBarChapters(string text)
         {
-            //tvChapters.Items.Clear();
             SideBarChapters.Clear();
 
             List<(int htag, string text, string id)> chapters = new();
@@ -174,7 +173,7 @@ namespace MarkdownReader
 
             string markdown = File.ReadAllText(path);
 
-            LoadMarkdown(markdown, path);
+            GenerateMarkdown(markdown, path);
         }
 
         private static TreeViewItemExpanded MakeTree
